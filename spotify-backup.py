@@ -151,15 +151,15 @@ def main():
     )
     parser.add_argument(
         "--dump",
-        default="playlists",
+        default="liked,playlists",
         choices=["liked,playlists", "playlists,liked", "playlists", "liked"],
-        help="dump playlists or liked songs, or both (default: playlists)",
+        help="dump playlists or liked songs, or both (default: liked,playlists)",
     )
     parser.add_argument(
         "--format",
-        default="txt",
-        choices=["json", "txt"],
-        help="output format (default: txt)",
+        default="csv",
+        choices=["json", "csv", "txt"],
+        help="output format (default: csv)",
     )
     parser.add_argument("file", help="output filename", nargs="?")
     args = parser.parse_args()
@@ -219,6 +219,27 @@ def main():
         # JSON file.
         if args.format == "json":
             json.dump({"playlists": playlists, "albums": liked_albums}, f)
+
+        # CSV file
+        elif args.format == "csv":
+            f.write("Playlist,Name,Artists,Popularity\n")
+            for playlist in playlists:
+                for track in playlist["tracks"]:
+                    if track["track"] is None:
+                        continue
+
+                    pl_name = playlist["name"].replace('"', "'").replace(",", ";")
+                    name = track["track"]["name"].replace('"', "'").replace(",", ";")
+                    artists = (
+                        "; ".join(
+                            [artist["name"] for artist in track["track"]["artists"]]
+                        )
+                        .replace('"', "'")
+                        .replace(",", ";")
+                    )
+                    pop = track["track"]["popularity"]
+
+                    f.write(f"{pl_name},{name},{artists},{pop}\n")
 
         # Tab-separated file.
         else:
