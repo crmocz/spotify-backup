@@ -136,6 +136,10 @@ class SpotifyAPI:
             self.access_token = access_token
 
 
+def clean(txt: str) -> str:
+    return txt.replace('"', "'").replace(",", ";")
+
+
 def main():
     # Parse arguments.
     parser = argparse.ArgumentParser(
@@ -222,24 +226,21 @@ def main():
 
         # CSV file
         elif args.format == "csv":
-            f.write("Playlist,Name,Artists,Popularity\n")
+            f.write("Playlist,Name,Artists,Album,Popularity,ISRC\n")
             for playlist in playlists:
                 for track in playlist["tracks"]:
                     if track["track"] is None:
                         continue
 
-                    pl_name = playlist["name"].replace('"', "'").replace(",", ";")
-                    name = track["track"]["name"].replace('"', "'").replace(",", ";")
-                    artists = (
-                        "; ".join(
-                            [artist["name"] for artist in track["track"]["artists"]]
-                        )
-                        .replace('"', "'")
-                        .replace(",", ";")
-                    )
+                    pl_name = clean(playlist["name"])
+                    name = clean(track["track"]["name"])
+                    a_lst = [artist["name"] for artist in track["track"]["artists"]]
+                    artists = clean("; ".join(a_lst))
+                    album = clean(track["track"]["album"]["name"])
                     pop = track["track"]["popularity"]
+                    isrc = track["track"]["external_ids"]["isrc"]
 
-                    f.write(f"{pl_name},{name},{artists},{pop}\n")
+                    f.write(f"{pl_name},{name},{artists},{album},{pop},{isrc}\n")
 
         # Tab-separated file.
         else:
