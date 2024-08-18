@@ -6,6 +6,7 @@ import http.client
 import http.server
 import json
 import logging
+import os
 import re
 import sys
 import time
@@ -15,6 +16,8 @@ import urllib.request
 import webbrowser
 
 logging.basicConfig(level=20, datefmt="%I:%M:%S", format="[%(asctime)s] %(message)s")
+if (SPOTIFY_CLIENT_ID := os.environ.get("SPOTIFY_CLIENT_ID")) is None:
+    exit(1)
 
 
 class SpotifyAPI:
@@ -178,8 +181,8 @@ def main():
         spotify = SpotifyAPI(args.token)
     else:
         spotify = SpotifyAPI.authorize(
-            client_id="5c098bcc800e45d49e476265bc9b6934",
-            scope="playlist-read-private playlist-read-collaborative user-library-read",
+            client_id=SPOTIFY_CLIENT_ID,
+            scope="playlist-read-private playlist-read-collaborative user-library-read user-top-read",
         )
 
     # Get the ID of the logged in user.
